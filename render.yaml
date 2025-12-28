@@ -10,18 +10,20 @@ services:
         value: production
       - key: DATABASE_URL
         sync: false
-      - key: OPENAI_API_KEY
+      - key: LLM_PROVIDER
+        value: groq
+      - key: GROQ_API_KEY
         sync: false
-      - key: OPENAI_MODEL
-        value: gpt-3.5-turbo
+      - key: GROQ_MODEL
+        value: llama-3.1-8b-instant
     healthCheckPath: /health
 
   - type: web
     name: chat-frontend
-    env: node
+    env: static
     plan: free
     buildCommand: cd frontend && npm install && npm run build
-    startCommand: cd frontend && npm run preview
+    staticPublishPath: ./frontend/dist
     envVars:
       - key: VITE_API_URL
         sync: false
