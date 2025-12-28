@@ -57,7 +57,7 @@ export async function getConversationHistory(conversationId: string): Promise<Ch
     [conversationId]
   );
 
-  return result.rows.map((row) => ({
+  return result.rows.map((row: any) => ({
     id: row.id,
     conversationId: row.conversation_id,
     sender: row.sender,

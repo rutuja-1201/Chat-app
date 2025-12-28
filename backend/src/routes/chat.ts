@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { processMessage, getConversationHistory } from '../services/chatService.js';
 import { validateMessageLength } from '../middleware/validateInput.js';
@@ -10,7 +10,7 @@ const messageSchema = z.object({
   sessionId: z.string().uuid().optional().nullable(),
 });
 
-chatRouter.post('/message', validateMessageLength, async (req, res, next) => {
+chatRouter.post('/message', validateMessageLength, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { message, sessionId } = messageSchema.parse(req.body);
     const result = await processMessage(message, sessionId || undefined);
@@ -20,7 +20,7 @@ chatRouter.post('/message', validateMessageLength, async (req, res, next) => {
   }
 });
 
-chatRouter.get('/history/:sessionId', async (req, res, next) => {
+chatRouter.get('/history/:sessionId', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { sessionId } = req.params;
     const history = await getConversationHistory(sessionId);
