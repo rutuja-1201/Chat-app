@@ -1,6 +1,6 @@
-# Spur Chat App - AI Live Chat Agent
 
-A full-stack AI-powered customer support chat application built for the Spur take-home assignment.
+
+A full-stack AI-powered customer support chat application .
 
 ## 🚀 Features
 
@@ -364,6 +364,4 @@ Chat-App/
 └── package.json
 ```
 
-## 📄 License
 
-This project is built for the Spur take-home assignment.
