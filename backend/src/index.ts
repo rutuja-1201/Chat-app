@@ -1,10 +1,6 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { readFileSync } from 'fs';
-import { join } from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 import { chatRouter } from './routes/chat.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { db, initDb } from './db/connection.js';
@@ -29,9 +25,24 @@ app.get('/health', async (req: Request, res: Response) => {
 app.post('/migrate', async (req: Request, res: Response) => {
   try {
     await initDb();
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = dirname(__filename);
-    const schema = readFileSync(join(__dirname, 'db', 'schema.sql'), 'utf-8');
+    const schema = `
+CREATE TABLE IF NOT EXISTS conversations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  conversation_id UUID NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+  sender VARCHAR(10) NOT NULL CHECK (sender IN ('user', 'ai')),
+  text TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_messages_conversation_id ON messages(conversation_id);
+CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at);
+`;
     await db.query(schema);
     res.json({ status: 'success', message: 'Migration completed successfully' });
   } catch (error: any) {
