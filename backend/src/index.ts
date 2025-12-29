@@ -1,9 +1,13 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import { chatRouter } from './routes/chat.js';
 import { errorHandler } from './middleware/errorHandler.js';
-import { initDb } from './db/connection.js';
+import { db, initDb } from './db/connection.js';
 
 dotenv.config();
 
@@ -19,6 +23,20 @@ app.get('/health', async (req: Request, res: Response) => {
     res.json({ status: 'ok', database: 'connected' });
   } catch (error) {
     res.status(503).json({ status: 'error', database: 'disconnected' });
+  }
+});
+
+app.post('/migrate', async (req: Request, res: Response) => {
+  try {
+    await initDb();
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = dirname(__filename);
+    const schema = readFileSync(join(__dirname, 'db', 'schema.sql'), 'utf-8');
+    await db.query(schema);
+    res.json({ status: 'success', message: 'Migration completed successfully' });
+  } catch (error: any) {
+    console.error('Migration failed:', error);
+    res.status(500).json({ status: 'error', message: error.message || 'Migration failed' });
   }
 });
 
